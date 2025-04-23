@@ -76,15 +76,18 @@ document.addEventListener('keydown', function(e) {
             // Tráo đổi với div phía trên
             targetLink = links[currentIndex - numberOfColumns];
             swapPositions(selectedLink, targetLink);
+            swapPositions(links[currentIndex - numberOfColumns], links[currentIndex+1]);
         } else if (e.key === "ArrowDown" && currentIndex + numberOfColumns + 1 <= links.length) {
             // Tráo đổi với div phía dưới
             targetLink = links[currentIndex + numberOfColumns+1];
+            swapPositions(links[currentIndex + numberOfColumns], links[currentIndex]);
             swapPositions(selectedLink, targetLink);
-        } else if (e.key === "ArrowLeft" && currentIndex > 0) {
+            
+        } else if (e.key === "ArrowLeft" && currentIndex > 0 && currentIndex % numberOfColumns !==0) {
             // Tráo đổi với div phía trái (cùng hàng)
             targetLink = links[currentIndex - 1];
             swapPositions(selectedLink, targetLink);
-        } else if (e.key === "ArrowRight" && currentIndex < links.length - 1) {
+        } else if (e.key === "ArrowRight" && currentIndex < links.length - 1 && (currentIndex+1) % numberOfColumns !==0) {
             // Tráo đổi với div phía phải (cùng hàng)
             targetLink = links[currentIndex + 2];
             swapPositions(selectedLink, targetLink);
