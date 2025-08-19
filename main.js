@@ -101,6 +101,122 @@ function swapPositions(link1, link2) {
     
 }
 
+// Custom right click context menu for copying link inside div
+(function() {
+    // Create the custom context menu element
+    const menu = document.createElement('div');
+    menu.id = 'custom-context-menu';
+
+    // Create menu item "Copy Link"
+    const menuItem = document.createElement('div');
+    menuItem.textContent = 'Copy Link';
+    menuItem.style.cursor = 'pointer';
+    
+    menu.appendChild(menuItem);
+    document.body.appendChild(menu);
+
+    let currentLinkDiv = null; // Store the current .link element
+
+    // Intercept right-click and show the custom menu if over a .link element
+    document.addEventListener('contextmenu', function(e) {
+        const linkDiv = e.target.closest('.link');
+        if (linkDiv) {
+            e.preventDefault();
+            currentLinkDiv = linkDiv;
+            showMenu(e.pageX, e.pageY);
+        } else {
+            hideMenu();
+        }
+    });
+
+    // When "Copy Link" is clicked, copy the href from the contained <a>
+    menuItem.addEventListener('click', function() {
+        if (currentLinkDiv) {
+            const anchor = currentLinkDiv.querySelector('a');
+            if (anchor && anchor.href) {
+                copyToClipboard(anchor.href);
+            }
+        }
+        hideMenu();
+    });
+
+    // Hide the custom menu on clicking anywhere else
+    document.addEventListener('click', function() {
+        hideMenu();
+    });
+
+    // Hide the custom menu when switching to another tab or window
+    window.addEventListener('blur', function() {
+        hideMenu();
+    });
+
+    // Function to show the menu at specified coordinates
+    function showMenu(x, y) {
+        menu.style.top = y + 'px';
+        menu.style.left = x + 'px';
+        menu.style.display = 'block';
+    }
+
+    // Function to hide the menu
+    function hideMenu() {
+        menu.style.display = 'none';
+    }
+
+    // Function to copy text to the clipboard with original unencoded link
+    function copyToClipboard(text) {
+        // Decode the URL to remove percent-encoded characters
+        try {
+            text = decodeURIComponent(text);
+        } catch (err) {
+            // If decoding fails, use the original text
+        }
+        // If it's a file explorer link, convert "file://" to UNC path with backslashes
+        if (text.startsWith("file://")) {
+            text = text.replace("file://", "\\\\");
+            text = text.replace(/\//g, "\\");
+        }
+        // Function to display notification
+        function showNotification() {
+            const notif = document.createElement("div");
+            notif.textContent = "Link Copied";
+            notif.style.position = "fixed";
+            notif.style.top = "20px";
+            notif.style.left = "50%";
+            notif.style.transform = "translateX(-50%)";
+            notif.style.background = "rgba(0, 0, 0, 0.42)";
+            notif.style.color = "#fff";
+            notif.style.padding = "10px 20px";
+            notif.style.borderRadius = "5px";
+            notif.style.zIndex = "9999";
+            document.body.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.remove();
+            }, 2000);
+        }
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification();
+            }).catch(err => {
+                alert('Failed to copy text: ' + err);
+            });
+        } else {
+            // Fallback approach
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showNotification();
+            } catch (err) {
+                alert('Failed to copy text');
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+})();
 
 // Đọc vị trí đã lưu và sắp xếp lại các div
 function restoreLayout() {
